@@ -4,61 +4,102 @@ const Player = (token, name) => {
   return { token, name, wins, losses };
 };
 
-
 let player_one = Player("X", "Player 1");
 let player_two = Player("O", "Player 2");
 
 const renderMove = (cell) => {
-  if (cell.innerHTML == '' && Game.over == false) {
-    if (Game.turn % 2 == 1) {
+  if (cell.innerHTML == '' && play.over == false) {
+    if (play.turn % 2 == 1) {
       cell.innerHTML = player_one.token;
-      Game.board[cell.id] = player_one.token;
+      play.board[cell.id] = player_one.token;
     } else {
       cell.innerHTML = player_two.token;
-      Game.board[cell.id] = player_two.token;
+      play.board[cell.id] = player_two.token;
     }
     cell.style.backgroundColor = "white";
     checkWin();
-    Game.turn++;
+    play.turn++;
+    renderScore();
   }
 };
 
 const checkWin = () => {
   for (let i=1, j=1; i<8, j<4; i=i+3, j++) {
-    let row = [Game.board[i.toString()], Game.board[(i+1).toString()], Game.board[(i+2).toString()]];
-    let column = [Game.board[j.toString()], Game.board[(j+3).toString()], Game.board[(j+6).toString()]];
-    let diagonalDown = [Game.board[(i).toString()], Game.board[(i+4).toString()], Game.board[(i+8).toString()]];
-    let diagonalUp = [Game.board[(i+2).toString()], Game.board[(i+4).toString()], Game.board[(i+6).toString()]];
+    let row = [play.board[i], play.board[(i+1)], play.board[(i+2)]];
+    let column = [play.board[j], play.board[(j+3)], play.board[(j+6)]];
+    let diagonalDown = [play.board[(i)], play.board[(i+4)], play.board[(i+8)]];
+    let diagonalUp = [play.board[(i+2)], play.board[(i+4)], play.board[(i+6)]];
     if (row.every(x => x != '' && x == row[0])) {
-      winner();
+      gameover("winner");
+      break;
     } else if (column.every(x => x != '' && x == column[0])) {
-      winner();
+      gameover("winner");
+      break;
     } else if (diagonalDown.every(x => x != '' && x == diagonalDown[0])) {
-      winner();
+      gameover("winner");
+      break;
     } else if (diagonalUp.every(x => x != '' && x == diagonalUp[0])) {
-      winner();
-    } else if (Game.turn == 9) {
-      winner();
+      gameover("winner");
+      break;
+    } else if (play.turn == 9) {
+      gameover("draw");
     }
   }
 };
 
-const winner = () => {
-  if (Game.turn == 9) {
-    document.getElementById("winner").innerHTML = `Draw...`;
-  } else if (Game.turn % 2 == 1) {
+const gameover = (input) => {
+  let winner = document.getElementById("winner");
+  if (play.turn % 2 == 1 && input == "winner") {
     player_one.wins++;
     player_two.losses++;
-    document.getElementById("winner").innerHTML = `${player_one.name} Wins!!!`;
-  } else {
+    winner.innerHTML = `${player_one.name} Wins!!!`;
+  } else if (input == "winner") {
     player_one.losses++;
     player_two.wins++;
-    document.getElementById("winner").innerHTML = `${player_two.name} Wins!!!`;
+    winner.innerHTML = `${player_two.name} Wins!!!`;
+  } else if (input == "draw") {
+    winner.innerHTML = `Draw...`;
   }
-  Game.over = true;
+  play.over = true;
+  let newGameBtn = document.createElement("BUTTON");
+  newGameBtn.classList.add("new_game_btn");
+  newGameBtn.innerHTML = "New Game";
+  newGameBtn.onclick = newGame;
+  winner.insertAdjacentElement('beforeend', newGameBtn);
 };
 
-const Game = (() => {
+const renderScore = () => {
+  let token1 = document.getElementById("cell_0");
+  token1.innerHTML = player_one.token;
+  document.getElementById("cell_1").innerHTML = player_one.name;
+  document.getElementById("cell_2").innerHTML = player_one.wins;
+  document.getElementById("cell_3").innerHTML = player_one.losses;
+  let token2 = document.getElementById("cell_4");
+  token2.innerHTML = player_two.token;
+  document.getElementById("cell_5").innerHTML = player_two.name;
+  document.getElementById("cell_6").innerHTML = player_two.wins;
+  document.getElementById("cell_7").innerHTML = player_two.losses;
+
+  if (play.turn % 2 == 1 && play.over == false) {
+    token1.style.visibility = "visible";
+    token2.style.visibility = "hidden";
+  } else if (play.over == false) {
+    token2.style.visibility = "visible";
+    token1.style.visibility = "hidden";
+  }
+};
+
+const newGame = () => {
+  let table = document.getElementById("gameboard");
+  document.getElementById("winner").innerHTML = "";
+  for(let i = table.rows.length - 1; i >= 0; i--) {
+    table.deleteRow(i);
+  }
+  play = Game();
+  renderScore();
+};
+
+const Game = () => {
   let board = {};
   let turn = 1;
   let over = false;
@@ -75,10 +116,12 @@ const Game = (() => {
     }
     gameboard.appendChild(row);
   }
-  return { board, turn, over }
-})();
+  return { board, turn, over };
+};
 
-const ScoreBoard = (() => {
+let play = Game();
+
+const RenderPage = (() => {
   let scoreboard = document.getElementById("scoreboard");
   for (let rows = 0; rows < 2; rows++) {
     let row = document.createElement("tr");
@@ -90,15 +133,5 @@ const ScoreBoard = (() => {
     }
     scoreboard.appendChild(row);
   }
-})();
-
-const renderScore = (() => {
-  document.getElementById("cell_0").innerHTML = player_one.token;
-  document.getElementById("cell_1").innerHTML = player_one.name;
-  document.getElementById("cell_2").innerHTML = player_one.wins;
-  document.getElementById("cell_3").innerHTML = player_one.losses;
-  document.getElementById("cell_4").innerHTML = player_two.token;
-  document.getElementById("cell_5").innerHTML = player_two.name;
-  document.getElementById("cell_6").innerHTML = player_two.wins;
-  document.getElementById("cell_7").innerHTML = player_two.losses;
+  renderScore();
 })();

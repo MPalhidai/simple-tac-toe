@@ -10,13 +10,13 @@ body {
   border: solid 1px black;
 }
 
-.game-container {
-
+.new_game_btn {
+  margin-left: 10px;
 }
 
 #gameboard {
-  margin-left: -160px; /* half of width */
-  margin-top: -160px;  /* half of height */
+  margin-left: -160px; /* half width of table */
+  margin-top: -160px;  /* half height of table */
   position: fixed;
   top: 50%;
   left: 50%;
